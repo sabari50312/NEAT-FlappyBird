@@ -1,40 +1,46 @@
 import os
 import pygame
-from random import randint
+from random import choice
 import neat
 
 pygame.init()
 
 #CONSTANTS
-WIDTH, HEIGHT = 600, 700  #Screen height and width
+WIDTH, HEIGHT = 400, 600  #Screen height and width
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
-P_HEIGHT = 38  #Player height DO NOT CHANGE
-P_WIDTH = 54  #Player width DO NOT CHANGE
+P_HEIGHT = 24  #Player height DO NOT CHANGE
+P_WIDTH = 34  #Player width DO NOT CHANGE
 VELOCITY = 7  #Initial downwards velocity 7 works
 FPS = 60  #FPS duh
 BG = pygame.image.load("bg.png").convert_alpha()  #Background image
-PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()
-PIPE_BOTTOM = pygame.image.load("pipe1.png").convert_alpha()
+PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()  #Top pipe
+PIPE_BOTTOM = pygame.image.load("pipe1.png").convert_alpha()  #Bottom pipe
+PIPE_IMG_HEIGHT = 379
 BIRD_SIZE = (P_WIDTH, P_HEIGHT)  #DO NOT CHANGE
 BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Player image
-JUMP_HEIGHT = 8  #Jump height Feel free to experiment though 7 works pretty well
+JUMP_HEIGHT = 8  #Jump height Feel free to experiment though 8 works pretty well
 GRAV = 0.8  #Gravity value Feel free to experiment though 0.8 works pretty well
-BLOCK_WIDTH = 140  #180
-BLOCK_GAP = 200  #210
+BLOCK_WIDTH = 52  #52
+BLOCK_GAP = 150  #150
 BLOCK_VEL = 4  #4
-my_font = pygame.font.SysFont('Consolas', 23)
-RUN = True
-GEN = 0
+my_font = pygame.font.SysFont('Consolas', 20)  #Set font and font size here
+RUN = True  #True
+GEN = 0  #0
 
 
-#The blocks class
 class obstacles:
+    """
+        #Class for bottom and top pipe
+        height1 and rect1 correspond to height and hitbox of top pipe
+        height2 and rect2 correspond to height and hitbox of bottom pipe
+        
+    """
 
     def __init__(self, width, gap, velocity):
         self.x = WIDTH + width - 20
         self.width = width
         self.velocity = velocity
-        self.height1 = randint(90, 400)
+        self.height1 = choice([80, 120, 160, 200, 240, 280, 320])
         self.height2 = (HEIGHT - gap) - self.height1
         self.rect1 = pygame.Rect(self.x, 0, self.width, self.height1)
         self.rect2 = pygame.Rect(self.x, HEIGHT - self.height2, self.width,
@@ -45,14 +51,17 @@ class obstacles:
         self.rect2.x -= self.velocity
 
     def draw(self):
-        pygame.draw.rect(WIN, (0, 0, 0), self.rect1)
-        pygame.draw.rect(WIN, (0, 0, 0), self.rect2)
-        WIN.blit(PIPE_TOP, (self.rect1.x, self.rect1.height - 379))
+        #pygame.draw.rect(WIN, (0, 0, 0), self.rect1)  #To view hitbox of top pipe
+        #pygame.draw.rect(WIN, (0, 0, 0), self.rect2)   #To view hitbox of bottom pipe
+        WIN.blit(PIPE_TOP, (self.rect1.x, self.rect1.height - PIPE_IMG_HEIGHT))
         WIN.blit(PIPE_BOTTOM, (self.rect2.x, self.rect2.y))
 
 
-#The birdy class
 class player:
+    """
+    #Birdy class
+    
+    """
     highscore = 0
 
     def __init__(self, x, y):
@@ -66,7 +75,7 @@ class player:
         self.run = True
 
     def draw(self):
-        pygame.draw.rect(WIN, (255, 0, 0), self.rect)
+        #pygame.draw.rect(WIN, (255, 0, 0), self.rect, 1)
         WIN.blit(BIRD_IMG,
                  (self.rect.x, self.rect.y))  #Draw the birdy on screen
 
@@ -90,10 +99,10 @@ def draw_window(birds, block, GEN):
     if len(birds) != 0:
         text2 = my_font.render("Score: " + str(birds[0].score), True,
                                (0, 0, 0))
-        WIN.blit(text2, dest=(WIDTH - 240, 30))
+        WIN.blit(text2, dest=(WIDTH - 200, 30))
     WIN.blit(text1, dest=(20, 30))
-    WIN.blit(text3, dest=(WIDTH - 240, 70))
-    WIN.blit(text4, dest=(WIDTH - 240, 90))
+    WIN.blit(text3, dest=(WIDTH - 200, 70))
+    WIN.blit(text4, dest=(WIDTH - 200, 90))
 
     pygame.display.update()
 
@@ -176,8 +185,7 @@ def main(genomes, config):
     clock = pygame.time.Clock()
 
     while (RUN):
-
-        #clock.tick(FPS)
+        clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 RUN = False
@@ -191,7 +199,7 @@ def main(genomes, config):
                  abs(bird.rect.y - (HEIGHT - block.height2))))
             bird.grav()
 
-            if (output[0] > 0.7):
+            if (output[0] > 0.5):
                 bird.isjump = True
                 jump_handler(bird)
             ge[x].fitness += 0.01
