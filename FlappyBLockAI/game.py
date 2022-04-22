@@ -7,23 +7,27 @@ pygame.init()
 
 #CONSTANTS
 WIDTH, HEIGHT = 400, 600  #Screen height and width
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
+PIPE_IMG_HEIGHT = 379
 P_HEIGHT = 24  #Player height DO NOT CHANGE
 P_WIDTH = 34  #Player width DO NOT CHANGE
-VELOCITY = 7  #Initial downwards velocity 7 works
-FPS = 60  #FPS duh
+BIRD_SIZE = (P_WIDTH, P_HEIGHT)  #DO NOT CHANGE
+BLOCK_WIDTH = 52  #Pipe width (52)
+BLOCK_GAP = 150  #Pipe height (150)
+
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))  #Pygame surface object
+my_font = pygame.font.SysFont('Consolas', 20)  #Set font and font size here
+
 BG = pygame.image.load("bg.png").convert_alpha()  #Background image
 PIPE_TOP = pygame.image.load("pipe2.png").convert_alpha()  #Top pipe
 PIPE_BOTTOM = pygame.image.load("pipe1.png").convert_alpha()  #Bottom pipe
-PIPE_IMG_HEIGHT = 379
-BIRD_SIZE = (P_WIDTH, P_HEIGHT)  #DO NOT CHANGE
-BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Player image
-JUMP_HEIGHT = 8  #Jump height Feel free to experiment though 8 works pretty well
-GRAV = 0.8  #Gravity value Feel free to experiment though 0.8 works pretty well
-BLOCK_WIDTH = 52  #52
-BLOCK_GAP = 150  #150
-BLOCK_VEL = 4  #4
-my_font = pygame.font.SysFont('Consolas', 20)  #Set font and font size here
+BIRD_IMG = pygame.image.load("birb.png").convert_alpha()  #Bird image
+
+VELOCITY = 7  #Initial downwards velocity (7)
+JUMP_HEIGHT = 8  #Jump height Feel free to experiment though (8)
+BLOCK_VEL = 4  # Horizontal velocity of block (4)
+GRAV = 0.8  #Gravity value Feel free to experiment though (0.8)
+
+FPS = 60  #FPS duh
 RUN = True  #True
 GEN = 0  #0
 
@@ -37,16 +41,19 @@ class obstacles:
     """
 
     def __init__(self, width, gap, velocity):
-        self.x = WIDTH + width - 20
+        self.x = WIDTH + width - 20  #To start the pipe outside the screen (+20 so its a little inside)
         self.width = width
         self.velocity = velocity
-        self.height1 = choice([80, 120, 160, 200, 240, 280, 320])
-        self.height2 = (HEIGHT - gap) - self.height1
+        self.height1 = choice([80, 120, 160, 200, 240, 280,
+                               320])  #Predefined heights of top pipe
+        self.height2 = (HEIGHT -
+                        gap) - self.height1  #Predefined height of bottom pipe
         self.rect1 = pygame.Rect(self.x, 0, self.width, self.height1)
         self.rect2 = pygame.Rect(self.x, HEIGHT - self.height2, self.width,
                                  self.height2)
 
     def move(self):
+        ''' Moves the pipes'''
         self.rect1.x -= self.velocity
         self.rect2.x -= self.velocity
 
@@ -65,7 +72,6 @@ class player:
     highscore = 0
 
     def __init__(self, x, y):
-        self.jumpcount = JUMP_HEIGHT
         self.isjump = False
         self.velocity = VELOCITY
         self.neg = 1
@@ -75,6 +81,7 @@ class player:
         self.run = True
 
     def draw(self):
+        '''Mobes the birds'''
         #pygame.draw.rect(WIN, (255, 0, 0), self.rect, 1)
         WIN.blit(BIRD_IMG,
                  (self.rect.x, self.rect.y))  #Draw the birdy on screen
@@ -86,20 +93,25 @@ class player:
 
 #All draw function calls
 def draw_window(birds, block, GEN):
-    WIN.blit(BG, (0, 0))
+    WIN.blit(BG, (0, 0))  #Draws background
 
+    #Draws all birds in generation
     for bird in birds:
         bird.draw()
-    block.draw()
-    text1 = my_font.render("Generation: " + str(GEN), True, (0, 0, 0))
-    text3 = my_font.render("Alive birds: " + str(len(birds)), True, (0, 0, 0))
-    text4 = my_font.render("Highscore: " + str(player.highscore), True,
-                           (0, 0, 0))
 
-    if len(birds) != 0:
+    block.draw()  #Draws pipes
+    text1 = my_font.render("Generation: " + str(GEN), True,
+                           (0, 0, 0))  #Prints generation on screen
+    text3 = my_font.render("Alive birds: " + str(len(birds)), True,
+                           (0, 0, 0))  #Prints alive birds on screen
+    text4 = my_font.render("Highscore: " + str(player.highscore), True,
+                           (0, 0, 0))  #Prints highscore on screen
+
+    if len(birds) != 0:  #If generation still has birds
         text2 = my_font.render("Score: " + str(birds[0].score), True,
                                (0, 0, 0))
         WIN.blit(text2, dest=(WIDTH - 200, 30))
+
     WIN.blit(text1, dest=(20, 30))
     WIN.blit(text3, dest=(WIDTH - 200, 70))
     WIN.blit(text4, dest=(WIDTH - 200, 90))
@@ -115,20 +127,23 @@ def jump_handler(bird):
         bird.velocity = VELOCITY
 
 
-#Function that handles collisions and out of bounds. Mess with this to enable noclip :) P.S.: THE SCORING FUNCTION IS IN HERE TOO
 def fail_handler(birds, ge, nets, block):
+    """
+    Function that handles collisions and out of bounds. Mess with this to enable noclip :) P.S.: THE SCORING FUNCTION IS IN HERE TOO
+
+    """
     global RUN
+
     if block.rect1.x < -block.width:  #If block goes out of screen
         block.__init__(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)
         for bird in birds:
             bird.score_updated = False
-        #If score is more than 200
-        if birds[0].score > 500:
+        if birds[0].score > 500:  #To quit the game if any bird reaches certain score
             RUN = False
 
     if len(birds) != 0:
         for x, bird in enumerate(birds):
-            #If collide with blocks
+            #If collide with pipes
             if pygame.Rect.colliderect(bird.rect,
                                        block.rect1) or pygame.Rect.colliderect(
                                            bird.rect, block.rect2):
@@ -138,11 +153,11 @@ def fail_handler(birds, ge, nets, block):
                 ge.pop(x)
 
         for x, bird in enumerate(birds):
-            #If gone through block
+            #If gone past a pipe
             if bird.rect.x > block.rect1.x + block.width and (
                     not bird.score_updated):
                 for g in ge:
-                    g.fitness += 3
+                    g.fitness += 5
                 bird.score += 1
                 bird.score_updated = True
                 player.highscore = max(player.highscore, bird.score)
@@ -155,9 +170,10 @@ def fail_handler(birds, ge, nets, block):
                 birds.pop(x)
                 nets.pop(x)
                 ge.pop(x)
+
             #If bird falls down
             if bird.rect.y > HEIGHT:
-                ge[x].fitness -= 20
+                ge[x].fitness -= 3
                 birds.pop(x)
                 nets.pop(x)
                 ge.pop(x)
@@ -168,14 +184,17 @@ def fail_handler(birds, ge, nets, block):
 def main(genomes, config):
     global RUN
     global GEN
-    GEN += 1
+
+    GEN += 1  #Increment generation count
     RUN = True
+
     #Neural net variables
     nets = []
     ge = []
     birds = []
     block = obstacles(BLOCK_WIDTH, BLOCK_GAP, BLOCK_VEL)
 
+    #Create generations of nerual net variables
     for _, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
@@ -185,7 +204,8 @@ def main(genomes, config):
     clock = pygame.time.Clock()
 
     while (RUN):
-        clock.tick(FPS)
+        clock.tick(FPS)  #Set the game speed
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 RUN = False
@@ -195,21 +215,23 @@ def main(genomes, config):
 
         for x, bird in enumerate(birds):
             output = nets[x].activate(
-                (bird.rect.y, abs(bird.rect.y - block.height1),
-                 abs(bird.rect.y - (HEIGHT - block.height2))))
+                (bird.rect.y, (bird.rect.y - block.height1),
+                 (bird.rect.y - (HEIGHT - block.height2)
+                  )))  #Calculate output (probability of jump)
+
             bird.grav()
 
-            if (output[0] > 0.5):
+            if (
+                    output[0] > 0.5
+            ):  #If probability if jumo is greater than certain value then jump all birds
                 bird.isjump = True
                 jump_handler(bird)
             ge[x].fitness += 0.01
 
-        block.move()
-        draw_window(birds, block, GEN)
+        block.move()  #Move pipes
+        draw_window(birds, block, GEN)  #Draw everything
         for bird in birds:
             bird.isjump = False
-
-    print("\n")
 
 
 def Run(config_path):
