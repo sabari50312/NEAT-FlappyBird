@@ -18,4 +18,7 @@ Requires:
 Just run the game.py file
 
 # AI Gameplay
-https://user-images.githubusercontent.com/73357431/164933971-08f96141-8fce-4446-8572-873cade2076b.mp4
+
+
+https://user-images.githubusercontent.com/73357431/164936723-b774e44d-3f42-4e55-9cf9-213f7556dd32.mp4
+
