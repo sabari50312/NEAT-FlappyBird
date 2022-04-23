@@ -224,8 +224,6 @@ def main(genomes, config):
 
         block.move()  #Move pipes
         draw_window(birds, block, GEN)  #Draw everything
-        for bird in birds:
-            bird.isjump = False
 
 
 def Run(config_path):
