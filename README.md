@@ -7,9 +7,8 @@ An AI that learns to play flappy bird using the NEAT python module (Reinforcemen
 
 
 
-# Prerequisites 
+# Dependencies 
 
-Requires:
 - Python (https://www.python.org/downloads/)
 - PyGame (https://www.pygame.org/)
 - NEAT (NeuroEvolution of Augmenting Topologies)  (https://neat-python.readthedocs.io/en/latest/installation.html)
